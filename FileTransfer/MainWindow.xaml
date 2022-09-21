@@ -1,0 +1,80 @@
+﻿<Window x:Class="FileTransfer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FileTransfer"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="35"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="4*"/>
+            <RowDefinition Height="75"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Margin="5">
+            <TextBlock Text="IPaddress:port" x:Name="ServerInfosBlock" VerticalAlignment="Center"/>
+            <Button Content="Copy" Height="20" Margin="10,0,10,0" VerticalAlignment="Center" Click="CopyIPAddress"/>
+            <Button Content="Start Server" Height="20" Margin="0,0,10,0" VerticalAlignment="Center" Click="StartServer" />
+        </StackPanel>
+
+        <Border Background="LightGray" Grid.Row="1"/>
+        <TextBox  x:Name="MessageBox" Grid.Row="1" TextWrapping="Wrap" Margin="5" ScrollViewer.VerticalScrollBarVisibility="Auto" IsReadOnly="True" FontSize="12" TextChanged="MessageBox_TextChanged"/>
+
+        <ListView x:Name="FileListView" Grid.Row="2">
+            <ListView.Resources>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding status}" Value="upload">
+                            <Setter Property="Foreground" Value="CornflowerBlue" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding status}" Value="download">
+                            <Setter Property="Foreground" Value="green" />
+                        </DataTrigger>
+                        
+                        
+                    </Style.Triggers>
+                </Style>
+            </ListView.Resources>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Path=name}" Width="85"/>
+                    <GridViewColumn Header="Size" DisplayMemberBinding="{Binding Path=display_size}" Width="85"/>
+                    <GridViewColumn Header="Status" DisplayMemberBinding="{Binding Path=status}" Width="85"/>
+                    <GridViewColumn Header="Progress" DisplayMemberBinding="{Binding Path=display_progress}" Width="85"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+        <Button Grid.Row="2" Content="Open Download Folder" Width="165" Height="20" Margin="0" VerticalAlignment="Top" HorizontalAlignment="Right" />
+        <Button Grid.Row="2" Content="Select Download Folder" Width="165"  Height="20" Margin="0,0,165,0" VerticalAlignment="Top" HorizontalAlignment="Right" Click="SelectDownloadFolder" />
+
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="LightGreen"/>
+            <TextBlock Text="Receive File From Server" HorizontalAlignment="Center"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Background="LightGray" Grid.Column="0" Margin="0,0,0,7">
+                <TextBlock Text="Server Address and Port: " VerticalAlignment="Center"/>
+                <TextBox x:Name="ServerInfosBox" Text="e.g. xxx.xxx.xxx.xxx:xxxxxx" Width="150"/>
+                <Button Content="Preview File" Click="PreviewFile"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="LightGray" Grid.Column="0" Margin="0,0,0,7">
+                <Button Content="Start Receive File" Click="Button_Click" />
+            </StackPanel>
+
+            <Border Grid.Column="1" Background="CornflowerBlue"/>
+            <TextBlock  Grid.Column="1" Text="Send File To Client" HorizontalAlignment="Center"/>
+            <Button Grid.Column="1" Width="110" Content="Upload File" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,7" Click="UploadFile"/>
+            <Button Grid.Column="1" Width="110" Content="Start File Transfer" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,7" />
+        </Grid>
+
+    </Grid>
+</Window>
