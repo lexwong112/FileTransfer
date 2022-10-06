@@ -19,6 +19,7 @@
             <TextBlock Text="IPaddress:port" x:Name="ServerInfosBlock" VerticalAlignment="Center"/>
             <Button Content="Copy" Height="20" Margin="10,0,10,0" VerticalAlignment="Center" Click="CopyIPAddress"/>
             <Button Content="Start Server" Height="20" Margin="0,0,10,0" VerticalAlignment="Center" Click="StartServer" />
+            <Button Content="Start Http Server" Height="20" Margin="0,0,10,0" VerticalAlignment="Center" Click="StartWebServer" />
         </StackPanel>
 
         <Border Background="LightGray" Grid.Row="1"/>

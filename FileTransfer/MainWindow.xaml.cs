@@ -27,7 +27,7 @@ namespace FileTransfer
     /// </summary>
     public partial class MainWindow : Window
     {
-        private int tcp_port;
+        public int tcp_port;
         TcpListener? listener;
         IPAddress? public_ip_address;
         IPAddress? private_ip_address;
@@ -37,8 +37,23 @@ namespace FileTransfer
 
         DispatcherTimer timer = new DispatcherTimer();
 
+        FileTransferService service = new();
+
+        public delegate void PrintHandler();
+
+        public static event PrintHandler? print_message;
+
+        private static void SendEvent()
+        {
+            if (print_message != null)
+            {
+                print_message();
+            }
+        }
+
         public MainWindow()
         {
+            
             InitializeComponent();
             tcp_port = 14535;
             String strHostName = string.Empty;
@@ -55,19 +70,19 @@ namespace FileTransfer
             {
                 if (addr[i].AddressFamily == AddressFamily.InterNetwork)
                 {
-                    private_ip_address = addr[i];
+                    service.private_ip_address = addr[i];
                 }
             }
 
-            public_ip_address = GetIPAddressAsync();
-            if(public_ip_address == null)
+            service.public_ip_address = GetIPAddressAsync();
+            if(service.public_ip_address == null)
             {
                 PrintMsg("Cannot check your public ip address, you can get it by yourself, port number is " + tcp_port);
                 updateIPAddressAndPort(IPAddress.Parse("1.1.1.1"), tcp_port);
             }
             else
             {
-                updateIPAddressAndPort(public_ip_address, tcp_port);
+                updateIPAddressAndPort(service.public_ip_address, service.port);
             }
         }
 
@@ -153,7 +168,7 @@ namespace FileTransfer
             
         }
 
-        void updateIPAddressAndPort(IPAddress ip, int port)
+        void updateIPAddressAndPort(IPAddress? ip, int? port)
         {
             ServerInfosBlock.Text = "Your Public IP Address: " + ip + ", Port: " + port;
         }
@@ -273,6 +288,11 @@ namespace FileTransfer
         }
 
 
+        public static void Print(string msg)
+        {
+
+        }
+
         void PrintMsg(string msg)
         {
             string thread_id = "[Thread: " + Thread.CurrentThread.ManagedThreadId + "] ";
@@ -301,12 +321,13 @@ namespace FileTransfer
             }
         }
 
-        List<FileTransferInfo> fileInfoList = new List<FileTransferInfo>();
+        public static List<FileTransferInfo> fileInfoList = new List<FileTransferInfo>();
 
         void updateFileListView()
         {
             
         }
+
 
 
         /// /User Interface 
@@ -334,19 +355,24 @@ namespace FileTransfer
                     fileInfoList.Add(fileTransferInfo);
                 }              
             }
+
+            //for web services
+            service.create_index(fileInfoList);
         }
+
+
 
         private void StartServer(object sender, RoutedEventArgs e)
         {
             new Thread(() =>
             {              
-                if(private_ip_address!= null)
+                if(service.private_ip_address != null)
                 {
                     try
                     {
                         PrintMsg("Start UPNP port mapping");
                         PortForward portForward = new PortForward();
-                        portForward.AddStaticPortMapping(tcp_port, tcp_port, PortForward.ProtocolType.TCP, private_ip_address.ToString(), true, "FileTransfer");
+                        portForward.AddStaticPortMapping(tcp_port, tcp_port, PortForward.ProtocolType.TCP, service.private_ip_address.ToString(), true, "FileTransfer");
                         PrintMsg("UPNP Port Mapping completed");
                     }
                     catch(Exception e)
@@ -355,7 +381,7 @@ namespace FileTransfer
                         return;
                     }
                     
-                    listener = new TcpListener(private_ip_address, tcp_port);
+                    listener = new TcpListener(service.private_ip_address, tcp_port);
                 }
                 else
                 {
@@ -373,6 +399,8 @@ namespace FileTransfer
                     PrintMsg(e.Message);
                 }               
             }).Start();
+
+
         }
 
         private void CopyIPAddress(object sender, RoutedEventArgs e)
@@ -504,8 +532,28 @@ namespace FileTransfer
                 PrintMsg("Please input server infos and click preview file first");
             }
         }
-    }                         
 
-    
-    
+
+        private void StartWebServer(object sender, RoutedEventArgs e)
+        {
+
+            if (service.private_ip_address == null)
+            {
+                PrintMsg("Fail to start server. Cannot find your private ip address!");
+                return;
+            }
+
+            if(service.server_started != true)
+            {
+                Thread thread = new Thread(() => service.start_server());
+                thread.Start();
+                PrintMsg("Starting Server");
+            }
+            else
+            {
+                PrintMsg("Server already Started");
+            }
+            
+        }
+    }                              
 }
